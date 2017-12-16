@@ -1,9 +1,11 @@
 require "gtk3"
 require "fileutils"
 require "launchy"
+require "mastodon"
 require "./app_conf"
 require "./init_client"
 require "./auth"
+require "./util"
 require "pp"
 
 current_path = File.expand_path(File.dirname(__FILE__))
@@ -40,7 +42,6 @@ class MastoAuthDialog < Gtk::Dialog
 
   def initialize(parent)
     super(:transient_for => parent, :use_header_bar => 0)
-
   end
 end
 
@@ -56,17 +57,15 @@ class CodeAuthDialog < Gtk::Dialog
 
   def initialize(parent)
     super(:transient_for => parent, :use_header_bar => 0)
-
   end
 end
-
 
 class MainWin < Gtk::ApplicationWindow
   type_register
   class << self
     def init
       set_template(:resource => "/rocks/veer66/bhasati/window.ui")
-      #bind_template_child("window")
+      bind_template_child("list_box")
     end
   end
   
@@ -79,8 +78,8 @@ class BhasatiApp < Gtk::Application
   def initialize
     super("rocks.veer66.bhasati", :flags_none)
     signal_connect "activate" do |application|
-      window = MainWin.new(application)
-      window.present
+      @window = MainWin.new(application)
+      @window.present
 
       unless $conf["user"] and $conf["user"]["access_token"]
         auth_dialog = MastoAuthDialog.new(window)
@@ -94,13 +93,27 @@ class BhasatiApp < Gtk::Application
             code_auth_dialog.close
             get_access_token($conf, code_auth_dialog.code_entry.text)
             $app_conf.save $conf
+            start_client
           end
           code_auth_dialog.present
-
         end
         auth_dialog.present
-
+      else
+        start_client
       end
+    end
+  end
+
+  def start_client
+    @client = Mastodon::REST::Client.new(base_url: $conf["user"]["base_url"],
+                                         bearer_token: $conf["user"]["access_token"])
+    
+    @client.home_timeline.each do |status|
+      content = plainize(status.content)
+      content_label = Gtk::Label.new
+      content_label.text = content
+      content_label.visible = true
+      @window.list_box << content_label
     end
   end
 end

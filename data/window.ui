@@ -4,5 +4,37 @@
     <property name="title" translatable="yes">Bhasati</property>
     <property name="default-width">800</property>
     <property name="default-height">600</property>
+    <child>
+      <object class="GtkScrolledWindow">
+        <property name="visible">True</property>
+        <property name="can_focus">True</property>
+        <property name="shadow_type">in</property>
+        <child>
+          <object class="GtkViewport">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <child>
+              <object class="GtkListBox" id="list_box">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+		<child>
+		  <object class="GtkEntry">
+		    <property name="visible">True</property>
+		    <property name="can_focus">True</property>
+		  </object>
+		</child>
+		<child>
+		  <object class="GtkLabel">
+		    <property name="visible">True</property>
+		    <property name="can_focus">True</property>
+		    <property name="label">@@@@</property>
+		  </object>
+		</child>
+              </object>
+            </child>
+          </object>
+        </child>
+      </object>
+    </child>
   </template>
 </interface>

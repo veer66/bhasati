@@ -106,6 +106,7 @@ DEPENDENCIES
   mastodon-api
   mechanize
   native-package-installer
+  nokogiri
   oauth2
   pkg-config
   rake
