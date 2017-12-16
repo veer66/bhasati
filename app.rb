@@ -44,6 +44,23 @@ class MastoAuthDialog < Gtk::Dialog
   end
 end
 
+class CodeAuthDialog < Gtk::Dialog
+  type_register
+  class << self
+    def init
+      set_template(:resource => "/rocks/veer66/bhasati/code-auth-dialog.ui")
+      bind_template_child("login_button")
+      bind_template_child("code_entry")
+    end
+  end
+
+  def initialize(parent)
+    super(:transient_for => parent, :use_header_bar => 0)
+
+  end
+end
+
+
 class MainWin < Gtk::ApplicationWindow
   type_register
   class << self
@@ -72,7 +89,14 @@ class BhasatiApp < Gtk::Application
           init_client($conf, auth_dialog.server_url_entry.text)
           auth_url = create_auth_url($conf)
           Launchy.open(auth_url)
-          $app_conf.save $conf
+          code_auth_dialog = CodeAuthDialog.new(window)
+          code_auth_dialog.login_button.signal_connect "clicked" do |but|
+            code_auth_dialog.close
+            get_access_token($conf, code_auth_dialog.code_entry.text)
+            $app_conf.save $conf
+          end
+          code_auth_dialog.present
+
         end
         auth_dialog.present
 

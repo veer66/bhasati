@@ -3,5 +3,6 @@
   <gresource prefix="/rocks/veer66/bhasati">
     <file preprocess="xml-stripblanks">window.ui</file>
     <file preprocess="xml-stripblanks">auth-dialog.ui</file>
+    <file preprocess="xml-stripblanks">code-auth-dialog.ui</file>
   </gresource>
 </gresources>
