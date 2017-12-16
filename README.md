@@ -1,5 +1,5 @@
 # Bhasati
-Bhasati is a Mastodon client for desktop written in Ruby.
+Bhasati is a Mastodon client for desktop written in Ruby using GTK+.
 
 ## Status
 
