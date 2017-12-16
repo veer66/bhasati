@@ -22,10 +22,10 @@
           </packing>
         </child>
         <child>
-	  <object class="GtkEntry" id="url-entry">
+	  <object class="GtkEntry" id="server_url_entry">
 	    <property name="visible">True</property>
 	    <property name="can_focus">True</property>
-	    <property name="text">https://mastondon.xyz</property>
+	    <property name="text">https://mastodon.xyz</property>
           </object>
           <packing>
 	    <property name="expand">False</property>
@@ -38,7 +38,7 @@
             <property name="can_focus">False</property>
             <property name="layout_style">end</property>
             <child>
-	      <object class="GtkButton">
+	      <object class="GtkButton" id="login_button">
                 <property name="label" translatable="yes">Login</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
