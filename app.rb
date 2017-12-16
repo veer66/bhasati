@@ -1,5 +1,5 @@
 require "gtk3"
-
+require "./app_conf"
 class AuthDialog < Gtk::Dialog
   type_register
   
@@ -26,6 +26,9 @@ Gio::Resources.register(resource)
 at_exit do
   FileUtils.rm_f gresource_bin
 end
+
+$app_conf = AppConf.new(".bhasati.toml")
+$conf = $app_conf.load
 
 class MastoAuthDialog < Gtk::Dialog
   type_register
@@ -62,8 +65,10 @@ class BhasatiApp < Gtk::Application
       window = MainWin.new(application)
       window.present
 
-      auth_dialog = MastoAuthDialog.new(window)
-      auth_dialog.present
+      unless $conf["user"]["access_token"]
+        auth_dialog = MastoAuthDialog.new(window)
+        auth_dialog.present
+      end
     end
   end
 end
