@@ -1,7 +1,9 @@
 require "gtk3"
 require "fileutils"
+require "launchy"
 require "./app_conf"
 require "./init_client"
+require "./auth"
 require "pp"
 
 current_path = File.expand_path(File.dirname(__FILE__))
@@ -39,11 +41,6 @@ class MastoAuthDialog < Gtk::Dialog
   def initialize(parent)
     super(:transient_for => parent, :use_header_bar => 0)
 
-    @login_button.signal_connect "clicked" do |but|
-      close
-      init_client($conf, @server_url_entry.text)
-      $app_conf.save $conf
-    end
   end
 end
 
@@ -70,7 +67,15 @@ class BhasatiApp < Gtk::Application
 
       unless $conf["user"] and $conf["user"]["access_token"]
         auth_dialog = MastoAuthDialog.new(window)
+        auth_dialog.login_button.signal_connect "clicked" do |but|
+          auth_dialog.close
+          init_client($conf, auth_dialog.server_url_entry.text)
+          auth_url = create_auth_url($conf)
+          Launchy.open(auth_url)
+          $app_conf.save $conf
+        end
         auth_dialog.present
+
       end
     end
   end

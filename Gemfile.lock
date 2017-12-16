@@ -48,6 +48,8 @@ GEM
     http-form_data (1.0.3)
     http_parser.rb (0.6.0)
     jwt (1.5.6)
+    launchy (2.4.3)
+      addressable (~> 2.3)
     mastodon-api (1.1.0)
       addressable (~> 2.4)
       http (~> 2.0)
@@ -100,6 +102,7 @@ PLATFORMS
 
 DEPENDENCIES
   gtk3
+  launchy
   mastodon-api
   mechanize
   native-package-installer
