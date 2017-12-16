@@ -112,6 +112,7 @@ class BhasatiApp < Gtk::Application
       content = plainize(status.content)
       content_label = Gtk::Label.new
       content_label.text = content
+      content_label.wrap = true
       content_label.visible = true
       @window.list_box << content_label
     end
