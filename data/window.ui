@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+  <template class="MainWin" parent="GtkApplicationWindow">
+    <property name="title" translatable="yes">Bhasati</property>
+    <property name="default-width">800</property>
+    <property name="default-height">600</property>
+  </template>
+</interface>
