@@ -15,7 +15,7 @@
             <property name="visible">True</property>
             <property name="can_focus">False</property>
 	    <child>
-	      <object class="GtkEntry">
+	      <object class="GtkEntry" id="toot_entry">
 		<property name="visible">True</property>
 		<property name="can_focus">True</property>	    
 	      </object>
@@ -25,7 +25,7 @@
               </packing>
 	    </child>
 	    <child>
-	      <object class="GtkButton">
+	      <object class="GtkButton" id="toot_button">
 		<property name="label" translatable="yes">Toot!</property>
 		<property name="visible">True</property>
 		<property name="can_focus">True</property>

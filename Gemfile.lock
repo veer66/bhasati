@@ -58,8 +58,6 @@ GEM
     http-form_data (1.0.3)
     http_parser.rb (0.6.0)
     jwt (1.5.6)
-    launchy (2.4.3)
-      addressable (~> 2.3)
     mechanize (2.7.5)
       domain_name (~> 0.5, >= 0.5.1)
       http-cookie (~> 1.0)
@@ -109,7 +107,6 @@ PLATFORMS
 
 DEPENDENCIES
   gtk3
-  launchy
   mastodon-api!
   mechanize
   native-package-installer

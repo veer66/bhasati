@@ -1,6 +1,5 @@
 require "gtk3"
 require "fileutils"
-require "launchy"
 require "mastodon"
 require "./app_conf"
 require "./init_client"
@@ -67,6 +66,8 @@ class MainWin < Gtk::ApplicationWindow
       set_template(:resource => "/rocks/veer66/bhasati/window.ui")
       bind_template_child("home_box")
       bind_template_child("noti_box")
+      bind_template_child("toot_entry")
+      bind_template_child("toot_button")
     end
   end
   
@@ -99,13 +100,13 @@ class BhasatiApp < Gtk::Application
       @window.present
 
       unless $conf["user"] and $conf["user"]["access_token"]
-        auth_dialog = MastoAuthDialog.new(window)
+        auth_dialog = MastoAuthDialog.new(@window)
         auth_dialog.login_button.signal_connect "clicked" do |but|
           auth_dialog.close
           init_client($conf, auth_dialog.server_url_entry.text)
           auth_url = create_auth_url($conf)
-          Launchy.open(auth_url)
-          code_auth_dialog = CodeAuthDialog.new(window)
+          `xdg-open '#{auth_url}'`
+          code_auth_dialog = CodeAuthDialog.new(@window)
           code_auth_dialog.login_button.signal_connect "clicked" do |but|
             code_auth_dialog.close
             get_access_token($conf, code_auth_dialog.code_entry.text)
@@ -121,7 +122,21 @@ class BhasatiApp < Gtk::Application
     end
   end
 
+  def toot(text)
+    return nil if text.empty?
+    Thread.new do
+      client = create_client
+      client.create_status(text)
+      @window.toot_entry.text = ""
+      update
+    end
+  end
+  
   def first_start_client
+    @window.toot_button.signal_connect "clicked" do |_|
+      toot(@window.toot_entry.text)
+    end
+    
     Thread.new do
       update
       @can_start = true
@@ -150,12 +165,15 @@ class BhasatiApp < Gtk::Application
     @window.home_box.pack_start(vbox, :expand => false, :fill => false, :padding => 7)
 
   end
-  
-  def update_home_timeline
-    client = Mastodon::REST::Client.new(
+
+  def create_client
+    Mastodon::REST::Client.new(
       base_url: $conf["user"]["base_url"],
       bearer_token: $conf["user"]["access_token"])
-
+  end
+  
+  def update_home_timeline
+    client = create_client
     client.home_timeline.each do |status|
       @home << status unless @home_id.has_key?(status.id)
     end
@@ -193,10 +211,7 @@ class BhasatiApp < Gtk::Application
   end
   
   def update_notifications
-    client = Mastodon::REST::Client.new(
-      base_url: $conf["user"]["base_url"],
-      bearer_token: $conf["user"]["access_token"])
-
+    client = create_client
     client.notifications.each do |noti|
       @noti << noti unless @noti_id.has_key?(noti.id)
     end
