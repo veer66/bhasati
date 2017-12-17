@@ -66,7 +66,7 @@ class MainWin < Gtk::ApplicationWindow
     def init
       set_template(:resource => "/rocks/veer66/bhasati/window.ui")
       bind_template_child("home_box")
-      bind_template_child("noti_list_box")
+      bind_template_child("noti_box")
     end
   end
   
@@ -79,11 +79,12 @@ class BhasatiApp < Gtk::Application
   def initialize
     super("rocks.veer66.bhasati", :flags_none)
     @can_start = false
-    @period = 10
+    @period = 60
 
     @home = []
-    @home_id = Hash.new(false)
+    @home_id = {}
     @noti = []
+    @noti_id = {}
     @max_list_len = 200
     
     Thread.new do
@@ -168,32 +169,45 @@ class BhasatiApp < Gtk::Application
     @home.each{|status| add_to_home(status)}                                                  
   end
 
+  def add_to_noti(noti)
+    vbox = Gtk::Box.new(Gtk::Orientation::VERTICAL)
+
+    acc_label = Gtk::Label.new
+    acc_label.text = "[#{noti.type}] @#{noti.account.display_name} #{noti.created_at}"
+    acc_label.halign = "start"
+    vbox.pack_start(acc_label, :expand => true, :fill => true, :padding => 2)
+    
+    content = plainize(noti.status.content)
+    content_label = Gtk::Label.new
+    content_label.text = content
+    content_label.wrap = true
+    content_label.halign = "start"
+    vbox.pack_start(content_label, :expand => false, :fill => false, :padding => 7)
+    
+    vbox.hexpand = false
+    vbox.halign = "start"
+    vbox.show_all
+    
+    @window.noti_box << vbox
+
+  end
+  
   def update_notifications
-    client = Mastodon::REST::Client.new(base_url: $conf["user"]["base_url"],
-                                        bearer_token: $conf["user"]["access_token"])
+    client = Mastodon::REST::Client.new(
+      base_url: $conf["user"]["base_url"],
+      bearer_token: $conf["user"]["access_token"])
 
     client.notifications.each do |noti|
-      vbox = Gtk::Box.new(Gtk::Orientation::VERTICAL)
-
-      acc_label = Gtk::Label.new
-      acc_label.text = "[#{noti.type}] @#{noti.account.display_name}"
-      acc_label.halign = "start"
-      vbox.pack_start(acc_label, :expand => true, :fill => true, :padding => 2)
-
-      content = plainize(noti.status.content)
-      content_label = Gtk::Label.new
-      content_label.text = content
-      content_label.wrap = true
-      content_label.halign = "start"
-      vbox.pack_start(content_label, :expand => false, :fill => false, :padding => 7)
-      
-      vbox.hexpand = false
-      vbox.halign = "start"
-      vbox.show_all
-      
-      @window.noti_list_box << vbox
+      @noti << noti unless @noti_id.has_key?(noti.id)
     end
 
+    @noti.sort_by! {|noti| noti.created_at}
+    @noti.reverse!
+    @noti = @noti.take(@max_list_len)
+    @noti_id = {}
+    @noti.each{|noti| @noti_id[noti.id] = true}
+    @window.noti_box.each{|child| @window.noti_box.remove(child)}
+    @noti.each{|noti| add_to_noti(noti)}                                                  
   end
   
   def update
