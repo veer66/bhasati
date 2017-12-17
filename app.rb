@@ -88,7 +88,8 @@ class BhasatiApp < Gtk::Application
     @noti_id = {}
     @max_list_len = 200
     @max_width_chars = 50
-    
+    @font_desc = Pango::FontDescription.new("Sans 16")
+
     Thread.new do
       loop do
         update if @can_start
@@ -146,7 +147,8 @@ class BhasatiApp < Gtk::Application
 
   def create_label(text)
     label = Gtk::Label.new
-    label.text = text
+    label.label = text
+    label.override_font(@font_desc)
     label.max_width_chars = @max_width_chars
     label.halign = "start"
     label.wrap = true
@@ -161,13 +163,14 @@ class BhasatiApp < Gtk::Application
     vbox.pack_start(acc_label, :expand => true, :fill => true, :padding => 2)
 
     content_label = create_label plainize(status.content)
-    vbox.pack_start(content_label, :expand => false, :fill => false, :padding => 2)
+    vbox.pack_start(content_label, :expand => true, :fill => true, :padding => 2)
     
-    vbox.hexpand = false
+    vbox.hexpand = true
+    vbox.vexpand = true
     vbox.halign = "start"
     
     vbox.show_all
-    @window.home_box.pack_start(vbox, :expand => false, :fill => false, :padding => 7)
+    @window.home_box.pack_start(vbox, :expand => true, :fill => true, :padding => 7)
 
   end
 
