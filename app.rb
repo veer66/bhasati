@@ -77,6 +77,18 @@ end
 class BhasatiApp < Gtk::Application
   def initialize
     super("rocks.veer66.bhasati", :flags_none)
+    @can_start = false
+    @period = 300
+
+    Thread.new do
+      loop do
+        if @can_start
+          start_client
+        end        
+        sleep(@period)
+      end        
+    end
+
     signal_connect "activate" do |application|
       @window = MainWin.new(application)
       @window.present
@@ -93,17 +105,24 @@ class BhasatiApp < Gtk::Application
             code_auth_dialog.close
             get_access_token($conf, code_auth_dialog.code_entry.text)
             $app_conf.save $conf
-            start_client
+            first_start_client
           end
           code_auth_dialog.present
         end
         auth_dialog.present
       else
-        start_client
+        first_start_client
       end
     end
   end
 
+  def first_start_client
+    Thread.new do
+      start_client
+      @can_start = true
+    end
+  end
+  
   def start_client
     @client = Mastodon::REST::Client.new(base_url: $conf["user"]["base_url"],
                                          bearer_token: $conf["user"]["access_token"])
@@ -128,8 +147,6 @@ class BhasatiApp < Gtk::Application
       
       vbox.show_all
       @window.list_box << vbox
-      
-      #@window.list_box << content_label
     end
   end
 end
