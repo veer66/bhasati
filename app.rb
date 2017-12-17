@@ -82,9 +82,7 @@ class BhasatiApp < Gtk::Application
 
     Thread.new do
       loop do
-        if @can_start
-          start_client
-        end        
+        start_client if @can_start
         sleep(@period)
       end        
     end
