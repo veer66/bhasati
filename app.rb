@@ -83,7 +83,7 @@ class BhasatiApp < Gtk::Application
 
     Thread.new do
       loop do
-        start_client if @can_start
+        update if @can_start
         sleep(@period)
       end        
     end
@@ -117,16 +117,16 @@ class BhasatiApp < Gtk::Application
 
   def first_start_client
     Thread.new do
-      start_client
+      update
       @can_start = true
     end
   end
-  
-  def start_client
-    @client = Mastodon::REST::Client.new(base_url: $conf["user"]["base_url"],
-                                         bearer_token: $conf["user"]["access_token"])
+
+  def update_home_timeline
+    client = Mastodon::REST::Client.new(base_url: $conf["user"]["base_url"],
+                                        bearer_token: $conf["user"]["access_token"])
     
-    @client.home_timeline.each do |status|
+    client.home_timeline.each do |status|
       vbox = Gtk::Box.new(Gtk::Orientation::VERTICAL)
 
       acc_label = Gtk::Label.new
@@ -147,10 +147,13 @@ class BhasatiApp < Gtk::Application
       vbox.show_all
       @window.home_list_box << vbox
     end
-    
-    notifications = @client.notifications
+  end
 
-    notifications.each do |noti|
+  def update_notifications
+    client = Mastodon::REST::Client.new(base_url: $conf["user"]["base_url"],
+                                        bearer_token: $conf["user"]["access_token"])
+
+    client.notifications.each do |noti|
       vbox = Gtk::Box.new(Gtk::Orientation::VERTICAL)
 
       acc_label = Gtk::Label.new
@@ -172,7 +175,13 @@ class BhasatiApp < Gtk::Application
       @window.noti_list_box << vbox
     end
 
-    
+  end
+  
+  def update
+    thrs = []
+    thrs << Thread.new { update_home_timeline }
+    thrs << Thread.new { update_notifications }
+    thrs.each {|thr| thr.join}
   end
 end
 
