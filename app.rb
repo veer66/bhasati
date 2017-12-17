@@ -65,7 +65,8 @@ class MainWin < Gtk::ApplicationWindow
   class << self
     def init
       set_template(:resource => "/rocks/veer66/bhasati/window.ui")
-      bind_template_child("list_box")
+      bind_template_child("home_list_box")
+      bind_template_child("noti_list_box")
     end
   end
   
@@ -144,8 +145,34 @@ class BhasatiApp < Gtk::Application
       vbox.halign = "start"
       
       vbox.show_all
-      @window.list_box << vbox
+      @window.home_list_box << vbox
     end
+    
+    notifications = @client.notifications
+
+    notifications.each do |noti|
+      vbox = Gtk::Box.new(Gtk::Orientation::VERTICAL)
+
+      acc_label = Gtk::Label.new
+      acc_label.text = "[#{noti.type}] @#{noti.account.display_name}"
+      acc_label.halign = "start"
+      vbox.pack_start(acc_label, :expand => true, :fill => true, :padding => 2)
+
+      content = plainize(noti.status.content)
+      content_label = Gtk::Label.new
+      content_label.text = content
+      content_label.wrap = true
+      content_label.halign = "start"
+      vbox.pack_start(content_label, :expand => false, :fill => false, :padding => 7)
+      
+      vbox.hexpand = false
+      vbox.halign = "start"
+      vbox.show_all
+      
+      @window.noti_list_box << vbox
+    end
+
+    
   end
 end
 

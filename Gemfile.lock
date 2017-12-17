@@ -1,3 +1,12 @@
+GIT
+  remote: git://github.com/tootsuite/mastodon-api.git
+  revision: a3ff60a872191aa2f499a2b4c7a85045ead14e64
+  specs:
+    mastodon-api (1.1.0)
+      addressable (~> 2.4)
+      buftok
+      http (~> 2.0)
+
 GEM
   remote: https://rubygems.org/
   specs:
@@ -5,6 +14,7 @@ GEM
       public_suffix (>= 2.0.2, < 4.0)
     atk (3.2.1)
       glib2 (= 3.2.1)
+    buftok (0.2.0)
     cairo (1.15.11)
       native-package-installer (>= 1.0.3)
       pkg-config (>= 1.2.2)
@@ -50,9 +60,6 @@ GEM
     jwt (1.5.6)
     launchy (2.4.3)
       addressable (~> 2.3)
-    mastodon-api (1.1.0)
-      addressable (~> 2.4)
-      http (~> 2.0)
     mechanize (2.7.5)
       domain_name (~> 0.5, >= 0.5.1)
       http-cookie (~> 1.0)
@@ -103,7 +110,7 @@ PLATFORMS
 DEPENDENCIES
   gtk3
   launchy
-  mastodon-api
+  mastodon-api!
   mechanize
   native-package-installer
   nokogiri
