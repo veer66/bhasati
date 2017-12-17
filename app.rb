@@ -109,12 +109,27 @@ class BhasatiApp < Gtk::Application
                                          bearer_token: $conf["user"]["access_token"])
     
     @client.home_timeline.each do |status|
+      vbox = Gtk::Box.new(Gtk::Orientation::VERTICAL)
+
+      acc_label = Gtk::Label.new
+      acc_label.text = '@' + status.account.username
+      acc_label.halign = "start"
+      vbox.pack_start(acc_label, :expand => true, :fill => true, :padding => 2)
+
       content = plainize(status.content)
       content_label = Gtk::Label.new
       content_label.text = content
       content_label.wrap = true
-      content_label.visible = true
-      @window.list_box << content_label
+      content_label.halign = "start"
+      
+      vbox.pack_start(content_label, :expand => false, :fill => false, :padding => 7)
+      vbox.hexpand = false
+      vbox.halign = "start"
+      
+      vbox.show_all
+      @window.list_box << vbox
+      
+      #@window.list_box << content_label
     end
   end
 end
