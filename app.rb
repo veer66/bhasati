@@ -87,6 +87,7 @@ class BhasatiApp < Gtk::Application
     @noti = []
     @noti_id = {}
     @max_list_len = 200
+    @max_width_chars = 50
     
     Thread.new do
       loop do
@@ -143,21 +144,25 @@ class BhasatiApp < Gtk::Application
     end
   end
 
+  def create_label(text)
+    label = Gtk::Label.new
+    label.text = text
+    label.max_width_chars = @max_width_chars
+    label.halign = "start"
+    label.wrap = true
+    label.wrap_mode = "word-char"
+    return label
+  end
+  
   def add_to_home(status)
     vbox = Gtk::Box.new(Gtk::Orientation::VERTICAL)
 
-    acc_label = Gtk::Label.new
-    acc_label.text = "@#{status.account.display_name} #{status.created_at}"
-    acc_label.halign = "start"
+    acc_label = create_label "@#{status.account.display_name} #{status.created_at}"
     vbox.pack_start(acc_label, :expand => true, :fill => true, :padding => 2)
 
-    content = plainize(status.content)
-    content_label = Gtk::Label.new
-    content_label.text = content
-    content_label.wrap = true
-    content_label.halign = "start"
-    
+    content_label = create_label plainize(status.content)
     vbox.pack_start(content_label, :expand => false, :fill => false, :padding => 2)
+    
     vbox.hexpand = false
     vbox.halign = "start"
     
@@ -190,16 +195,10 @@ class BhasatiApp < Gtk::Application
   def add_to_noti(noti)
     vbox = Gtk::Box.new(Gtk::Orientation::VERTICAL)
 
-    acc_label = Gtk::Label.new
-    acc_label.text = "[#{noti.type}] @#{noti.account.display_name} #{noti.created_at}"
-    acc_label.halign = "start"
+    acc_label = create_label "[#{noti.type}] @#{noti.account.display_name} #{noti.created_at}"
     vbox.pack_start(acc_label, :expand => true, :fill => true, :padding => 2)
     
-    content = plainize(noti.status.content)
-    content_label = Gtk::Label.new
-    content_label.text = content
-    content_label.wrap = true
-    content_label.halign = "start"
+    content_label = create_label plainize(noti.status.content)
     vbox.pack_start(content_label, :expand => false, :fill => false, :padding => 7)
     
     vbox.hexpand = false
