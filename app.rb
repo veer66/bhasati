@@ -65,7 +65,7 @@ class MainWin < Gtk::ApplicationWindow
   class << self
     def init
       set_template(:resource => "/rocks/veer66/bhasati/window.ui")
-      bind_template_child("home_list_box")
+      bind_template_child("home_box")
       bind_template_child("noti_list_box")
     end
   end
@@ -79,8 +79,13 @@ class BhasatiApp < Gtk::Application
   def initialize
     super("rocks.veer66.bhasati", :flags_none)
     @can_start = false
-    @period = 300
+    @period = 10
 
+    @home = []
+    @home_id = Hash.new(false)
+    @noti = []
+    @max_list_len = 200
+    
     Thread.new do
       loop do
         update if @can_start
@@ -122,31 +127,45 @@ class BhasatiApp < Gtk::Application
     end
   end
 
-  def update_home_timeline
-    client = Mastodon::REST::Client.new(base_url: $conf["user"]["base_url"],
-                                        bearer_token: $conf["user"]["access_token"])
+  def add_to_home(status)
+    vbox = Gtk::Box.new(Gtk::Orientation::VERTICAL)
+
+    acc_label = Gtk::Label.new
+    acc_label.text = "@#{status.account.display_name} #{status.created_at}"
+    acc_label.halign = "start"
+    vbox.pack_start(acc_label, :expand => true, :fill => true, :padding => 2)
+
+    content = plainize(status.content)
+    content_label = Gtk::Label.new
+    content_label.text = content
+    content_label.wrap = true
+    content_label.halign = "start"
     
+    vbox.pack_start(content_label, :expand => false, :fill => false, :padding => 2)
+    vbox.hexpand = false
+    vbox.halign = "start"
+    
+    vbox.show_all
+    @window.home_box.pack_start(vbox, :expand => false, :fill => false, :padding => 7)
+
+  end
+  
+  def update_home_timeline
+    client = Mastodon::REST::Client.new(
+      base_url: $conf["user"]["base_url"],
+      bearer_token: $conf["user"]["access_token"])
+
     client.home_timeline.each do |status|
-      vbox = Gtk::Box.new(Gtk::Orientation::VERTICAL)
-
-      acc_label = Gtk::Label.new
-      acc_label.text = "@#{status.account.display_name}"
-      acc_label.halign = "start"
-      vbox.pack_start(acc_label, :expand => true, :fill => true, :padding => 2)
-
-      content = plainize(status.content)
-      content_label = Gtk::Label.new
-      content_label.text = content
-      content_label.wrap = true
-      content_label.halign = "start"
-      
-      vbox.pack_start(content_label, :expand => false, :fill => false, :padding => 7)
-      vbox.hexpand = false
-      vbox.halign = "start"
-      
-      vbox.show_all
-      @window.home_list_box << vbox
+      @home << status unless @home_id.has_key?(status.id)
     end
+
+    @home.sort_by! {|status| status.created_at}
+    @home.reverse!
+    @home = @home.take(@max_list_len)
+    @home_id = {}
+    @home.each{|status| @home_id[status.id] = true}
+    @window.home_box.each{|child| @window.home_box.remove(child)}
+    @home.each{|status| add_to_home(status)}                                                  
   end
 
   def update_notifications
