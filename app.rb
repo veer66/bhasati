@@ -129,7 +129,7 @@ class BhasatiApp < Gtk::Application
       vbox = Gtk::Box.new(Gtk::Orientation::VERTICAL)
 
       acc_label = Gtk::Label.new
-      acc_label.text = '@' + status.account.username
+      acc_label.text = "@#{status.account.username}"
       acc_label.halign = "start"
       vbox.pack_start(acc_label, :expand => true, :fill => true, :padding => 2)
 
